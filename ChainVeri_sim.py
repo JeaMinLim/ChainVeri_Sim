@@ -7,7 +7,6 @@ from uuid import uuid4
 import requests
 from flask import Flask, jsonify, request
 
-
 class Blockchain:
     def __init__(self):
         self.current_transactions = []
@@ -22,7 +21,7 @@ class Blockchain:
         Add a new node to the list of nodes
         :param address: Address of node. Eg. 'http://192.168.0.5:5000'
         """
-
+        # jmlim: this nodes is only for Traders
         parsed_url = urlparse(address)
         if parsed_url.netloc:
             self.nodes.add(parsed_url.netloc)
@@ -31,7 +30,6 @@ class Blockchain:
             self.nodes.add(parsed_url.path)
         else:
             raise ValueError('Invalid URL')
-
 
     def valid_chain(self, chain):
         """
@@ -93,7 +91,8 @@ class Blockchain:
             return True
 
         return False
-
+    
+    # jmlim: change to Pallete blockchain structure
     def new_block(self, proof, previous_hash):
         """
         Create a new Block in the Blockchain
@@ -116,6 +115,7 @@ class Blockchain:
         self.chain.append(block)
         return block
 
+    # jmlim: change transaction to verification log
     def new_transaction(self, sender, recipient, amount):
         """
         Creates a new transaction to go into the next mined Block
@@ -219,6 +219,7 @@ def mine():
     return jsonify(response), 200
 
 
+# jmlim: chainge from transaction to validation
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
     values = request.get_json()
@@ -279,6 +280,15 @@ def consensus():
 
     return jsonify(response), 200
 
+# jmlim: verification funtion
+@app.route('/chainveri/verify', method=['post'])
+def firmware_verification():
+    v_info = request.get_json()
+    
+    response = {
+        'message': 'Firmware Verification initiation',
+    }
+    return jsonify(response), 201
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
