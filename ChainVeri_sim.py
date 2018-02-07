@@ -1,5 +1,4 @@
-import hashlib
-import json
+import hashlib, json
 from time import time
 from urllib.parse import urlparse
 from uuid import uuid4
@@ -9,16 +8,17 @@ from flask import Flask, jsonify, request
 
 class Blockchain:
     def __init__(self):
+        # Initalize Blockchain
+        # Create Genesis block
+
         self.current_transactions = []
         self.chain = []
         self.nodes = set()
 
-        # Create the genesis block
         self.new_block(previous_hash='1', proof=100)
 
     def register_node(self, address):
-        """
-        Add a new node to the list of nodes
+        """  Add a new node to the list of nodes
         :param address: Address of node. Eg. 'http://192.168.0.5:5000'
         """
         # jmlim: this nodes is only for Traders
@@ -37,7 +37,6 @@ class Blockchain:
         :param chain: A blockchain
         :return: True if valid, False if not
         """
-
         last_block = chain[0]
         current_index = 1
 
