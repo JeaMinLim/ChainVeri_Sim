@@ -1,4 +1,5 @@
-import hashlib, json
+import hashlib
+import json
 from time import time
 from urllib.parse import urlparse
 from uuid import uuid4
@@ -6,22 +7,24 @@ from uuid import uuid4
 import requests
 from flask import Flask, jsonify, request
 
-class Blockchain:
-    def __init__(self):
-        # Initalize Blockchain
-        # Create Genesis block
 
+class Blockchain:
+    # Initalize ChainVeri Blockchain
+    def __init__(self):
         self.current_transactions = []
         self.chain = []
         self.nodes = set()
 
+        # Create the genesis block
         self.new_block(previous_hash='1', proof=100)
 
     def register_node(self, address):
-        """  Add a new node to the list of nodes
+        """
+        Add a new node to the list of nodes
+
         :param address: Address of node. Eg. 'http://192.168.0.5:5000'
         """
-        # jmlim: this nodes is only for Traders
+
         parsed_url = urlparse(address)
         if parsed_url.netloc:
             self.nodes.add(parsed_url.netloc)
@@ -31,12 +34,15 @@ class Blockchain:
         else:
             raise ValueError('Invalid URL')
 
+
     def valid_chain(self, chain):
         """
         Determine if a given blockchain is valid
+
         :param chain: A blockchain
         :return: True if valid, False if not
         """
+
         last_block = chain[0]
         current_index = 1
 
@@ -62,6 +68,7 @@ class Blockchain:
         """
         This is our consensus algorithm, it resolves conflicts
         by replacing our chain with the longest one in the network.
+
         :return: True if our chain was replaced, False if not
         """
 
@@ -90,11 +97,11 @@ class Blockchain:
             return True
 
         return False
-    
-    # jmlim: change to Pallete blockchain structure
+
     def new_block(self, proof, previous_hash):
         """
         Create a new Block in the Blockchain
+
         :param proof: The proof given by the Proof of Work algorithm
         :param previous_hash: Hash of previous Block
         :return: New Block
@@ -114,10 +121,10 @@ class Blockchain:
         self.chain.append(block)
         return block
 
-    # jmlim: change transaction to verification log
     def new_transaction(self, sender, recipient, amount):
         """
         Creates a new transaction to go into the next mined Block
+
         :param sender: Address of the Sender
         :param recipient: Address of the Recipient
         :param amount: Amount
@@ -139,6 +146,7 @@ class Blockchain:
     def hash(block):
         """
         Creates a SHA-256 hash of a Block
+
         :param block: Block
         """
 
@@ -149,6 +157,7 @@ class Blockchain:
     def proof_of_work(self, last_block):
         """
         Simple Proof of Work Algorithm:
+
          - Find a number p' such that hash(pp') contains leading 4 zeroes
          - Where p is the previous proof, and p' is the new proof
          
@@ -169,10 +178,12 @@ class Blockchain:
     def valid_proof(last_proof, proof, last_hash):
         """
         Validates the Proof
+
         :param last_proof: <int> Previous Proof
         :param proof: <int> Current Proof
         :param last_hash: <str> The hash of the Previous Block
         :return: <bool> True if correct, False if not.
+
         """
 
         guess = f'{last_proof}{proof}{last_hash}'.encode()
@@ -218,7 +229,6 @@ def mine():
     return jsonify(response), 200
 
 
-# jmlim: chainge from transaction to validation
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
     values = request.get_json()
@@ -279,15 +289,6 @@ def consensus():
 
     return jsonify(response), 200
 
-# jmlim: verification funtion
-@app.route('/chainveri/verify', method=['post'])
-def firmware_verification():
-    v_info = request.get_json()
-    
-    response = {
-        'message': 'Firmware Verification initiation',
-    }
-    return jsonify(response), 201
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
