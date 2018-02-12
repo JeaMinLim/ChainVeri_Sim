@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+sudo pipenv instal
+sudo pipenv run python ChainVeri_sim.py -p 5000
