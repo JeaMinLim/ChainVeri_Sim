@@ -7,6 +7,8 @@ from uuid import uuid4
 import requests
 from flask import Flask, jsonify, request
 
+from datetime import datetime
+
 
 class Blockchain:
     # Initalize ChainVeri Blockchain
@@ -199,6 +201,25 @@ node_identifier = str(uuid4()).replace('-', '')
 
 # Instantiate the Blockchain
 blockchain = Blockchain()
+
+
+@app.route('/dump', methods=['GET'])
+def save_blockchain():
+    # save blockchain into file
+    date = datetime.today().strftime("%Y%m%d%H%M")
+
+    file = open("ChainVeri-" + date, 'w')
+    file.write("ChainVeri Blockchain " + date + "\n")
+    file.write(json.dumps(blockchain.chain, indent='\t'))
+
+    file.close()
+
+    # print blockchain data to client
+    response = {
+        'message': "Blockchain Saved",
+        'index': len(blockchain.chain),
+    }
+    return jsonify(response), 200
 
 
 @app.route('/mine', methods=['GET'])
