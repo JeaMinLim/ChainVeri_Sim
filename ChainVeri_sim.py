@@ -205,11 +205,21 @@ node_identifier = str(uuid4()).replace('-', '')
 # Instantiate the Blockchain
 blockchain = Blockchain()
 
-@app.route('/make_address', methods=['GET'])
+
+@app.route('/address/you', methods=['GET'])
+def send_my_address():
+    # Send this Trader`s address
+    response = {
+        'trader_addr': node_identifier,
+    }
+    return jsonify(response), 200
+
+
+@app.route('/address/device', methods=['GET'])
 def make_address():
-    # Generate and send random identifier for IoT devices.
+    # Generate and send random identifier(UUID) for IoT devices.
     # This API is for simulations ONLY!!!!
-    identifier = str(uuid4()).replace('-', '')
+    identifier = str(uuid4())
 
     response = {
         'identifier': identifier,
