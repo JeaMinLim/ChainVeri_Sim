@@ -210,18 +210,17 @@ def nodes_devices():
     # send connection result to IoT device
     values = request.get_json()
 
-    device_uuid = values.get('UUID')
-
-
     # Check that the required fields are in the POST'ed data
     required = ['ip', 'port', 'UUID']
     if not all(k in values for k in required):
         return 'Missing values', 400
 
+    device_uuid = values.get('UUID')
+
     response = {
         'your_UUID': device_uuid,
     }
-    return jsonify(response), 200
+    return jsonify(response), 201
 
 
 @app.route('/information/you', methods=['GET'])
