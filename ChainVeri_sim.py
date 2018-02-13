@@ -205,7 +205,7 @@ node_identifier = str(uuid4()).replace('-', '')
 blockchain = Blockchain()
 
 
-@app.route('/nodes/device', methons=['GET'])
+@app.route('/nodes/device', methods=['GET'])
 def nodes_devices():
     # send connection result to IoT device
     values = request.get_json()
