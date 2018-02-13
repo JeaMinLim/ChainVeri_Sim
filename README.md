@@ -12,7 +12,7 @@ This project is helps to mesure the overhead to verify firmware integrity.
 * Python3.6 or + 
 * pipenv for virtual and isolated enviroment(recommends)
 * Flask Python package (Make sure that packages installed for Python3 or +)
-* Rest API test tool(e.g POSTMAN)
+* Rest API test tool(e.g POSTMAN for develop and cURL for IoT device)
 
 # installation
 * git clone

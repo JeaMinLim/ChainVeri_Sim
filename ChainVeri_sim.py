@@ -115,6 +115,7 @@ class Blockchain:
             'transactions': self.current_transactions,
             'proof': proof,
             'previous_hash': previous_hash or self.hash(self.chain[-1]),
+            'type': 1,
         }
 
         # Reset the current list of transactions
@@ -123,19 +124,21 @@ class Blockchain:
         self.chain.append(block)
         return block
 
-    def new_transaction(self, sender, recipient, amount):
+    def new_transaction(self, sender, model_name, firmware_hash, version):
         """
-        Creates a new transaction to go into the next mined Block
+        Creates a new verification info to go into the next mined Block
 
-        :param sender: Address of the Sender
-        :param recipient: Address of the Recipient
-        :param amount: Amount
+        :param sender: Address of the Sender(UUID or Public Key eta.)
+        :param model_name: name of IoT device model
+        :param firmware_hash: The hash value of firmware
+        :param version: firmware version
         :return: The index of the Block that will hold this transaction
         """
         self.current_transactions.append({
             'sender': sender,
-            'recipient': recipient,
-            'amount': amount,
+            'model_name': model_name,
+            'firmware_hash': firmware_hash,
+            'version': version
         })
 
         return self.last_block['index'] + 1
@@ -202,6 +205,17 @@ node_identifier = str(uuid4()).replace('-', '')
 # Instantiate the Blockchain
 blockchain = Blockchain()
 
+@app.route('/make_address', methods=['GET'])
+def make_address():
+    # Generate and send random identifier for IoT devices.
+    # This API is for simulations ONLY!!!!
+    identifier = str(uuid4()).replace('-', '')
+
+    response = {
+        'identifier': identifier,
+    }
+    return jsonify(response), 200
+
 
 @app.route('/dump', methods=['GET'])
 def save_blockchain():
@@ -228,14 +242,6 @@ def mine():
     last_block = blockchain.last_block
     proof = blockchain.proof_of_work(last_block)
 
-    # We must receive a reward for finding the proof.
-    # The sender is "0" to signify that this node has mined a new coin.
-    blockchain.new_transaction(
-        sender="0",
-        recipient=node_identifier,
-        amount=1,
-    )
-
     # Forge the new Block by adding it to the chain
     previous_hash = blockchain.hash(last_block)
     block = blockchain.new_block(proof, previous_hash)
@@ -255,14 +261,14 @@ def new_transaction():
     values = request.get_json()
 
     # Check that the required fields are in the POST'ed data
-    required = ['sender', 'recipient', 'amount']
+    required = ['sender', 'model_name', 'firmware_hash', 'version']
     if not all(k in values for k in required):
         return 'Missing values', 400
 
     # Create a new Transaction
-    index = blockchain.new_transaction(values['sender'], values['recipient'], values['amount'])
+    index = blockchain.new_transaction(values['sender'], values['model_name'], values['firmware_hash'], values['version'])
 
-    response = {'message': f'Transaction will be added to Block {index}'}
+    response = {'message': f'Transaction will be added to Block'}
     return jsonify(response), 201
 
 
