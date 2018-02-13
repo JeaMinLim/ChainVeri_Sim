@@ -6,14 +6,16 @@ from uuid import uuid4
 
 import requests
 from flask import Flask, jsonify, request
+import socket
 
-class IoT_device:
+class device_info:
     def __init__(self):
         self.model_name = []
         self.firmware_version = []
         self.firmware_hash = []
-        self.public_Key = []
         self.UUID = []
+        self.trader_ip = []
+        self.trader_port = []
 
 
 if __name__ == '__main__':
@@ -28,11 +30,21 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--version', help='firmware version in string', default='Ubuntu 17.10')
 
     args = parser.parse_args()
+
+    device_info.trader_ip = args.ip
+    device_info.trader_port = args.port
+    device_info.model_name = args.model
+    device_info.UUID = args.sender
+    device_info.firmware_hash = args.firmware_hash
+    device_info.firmware_version = args.version
+
     print("Trader information")
-    print("\t IP: " + args.ip)
-    print("\t PORT: " + str(args.port))
+    print("\t IP: " + device_info.trader_ip)
+    print("\t PORT: " + str(device_info.trader_port))
     print("IoT node information")
-    print("\t MODEL: " + args.model)
-    print("\t SENDER(IoT device) UUID: " + args.sender)
-    print("\t FIRMWARE HASH: " + args.firmware_hash)
-    print("\t FIRMWARE VERSION:" + args.version)
+    print("\t MODEL: " + device_info.model_name)
+    print("\t SENDER(IoT device) UUID: " + device_info.UUID)
+    print("\t FIRMWARE HASH: " + device_info.firmware_hash)
+    print("\t FIRMWARE VERSION:" + device_info.firmware_version)
+    device_ip = socket.gethostbyname(socket.gethostname())
+    print("\t IP address: " + device_ip)
