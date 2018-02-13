@@ -205,6 +205,29 @@ node_identifier = str(uuid4()).replace('-', '')
 blockchain = Blockchain()
 
 
+@app.route('/nodes/device', methons=['GET'])
+def nodes_devices
+    # send connection result to IoT device
+    values = request.get_json()
+
+    device_ip = values.get('')
+    device_port = values.get('port')
+    device_uuid = values.get('UUID')
+
+    if device_ip is None:
+        return "Error: Please supply your ip address", 400
+
+    if device_port is None:
+        return "Error: Please supply your port number", 400
+
+    if device_uuid is None:
+        return "Error: Please supply your UUID", 400
+
+    response = {
+        'your_UUID': device_uuid,
+    }
+    return jsonify(response), 200
+
 @app.route('/information/you', methods=['GET'])
 def send_information():
     # Send this Trader`s information
