@@ -206,7 +206,7 @@ blockchain = Blockchain()
 
 
 @app.route('/nodes/device', methons=['GET'])
-def nodes_devices
+def nodes_devices():
     # send connection result to IoT device
     values = request.get_json()
 
