@@ -36,7 +36,6 @@ class Blockchain:
         else:
             raise ValueError('Invalid URL')
 
-
     def valid_chain(self, chain):
         """
         Determine if a given blockchain is valid
@@ -206,11 +205,11 @@ node_identifier = str(uuid4()).replace('-', '')
 blockchain = Blockchain()
 
 
-@app.route('/address/you', methods=['GET'])
-def send_my_address():
-    # Send this Trader`s address
+@app.route('/information/you', methods=['GET'])
+def send_information():
+    # Send this Trader`s information
     response = {
-        'trader_addr': node_identifier,
+        'trader_address': node_identifier,
     }
     return jsonify(response), 200
 
@@ -276,7 +275,7 @@ def new_transaction():
         return 'Missing values', 400
 
     # Create a new Transaction
-    index = blockchain.new_transaction(values['sender'], values['model_name'], values['firmware_hash'], values['version'])
+    blockchain.new_transaction(values['sender'], values['model_name'], values['firmware_hash'], values['version'])
 
     response = {'message': f'Transaction will be added to Block'}
     return jsonify(response), 201
