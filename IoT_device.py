@@ -1,6 +1,7 @@
 import json
 import requests
 from uuid import uuid4
+from flask import Flask, jsonify, request
 from netifaces import interfaces, ifaddresses, AF_INET
 
 class DeviceInfo:
@@ -21,6 +22,9 @@ class DeviceInfo:
         self.device_ip = ', '.join(_tmp)
         # create UUID for IoT device
         self.UUID = str(uuid4())
+
+
+app = Flask(__name__)
 
 
 if __name__ == '__main__':
@@ -46,7 +50,7 @@ if __name__ == '__main__':
     device.trader_ip = args.tip
     device.trader_port = args.tport
     device.model_name = args.model
-    #device.UUID = args.sender
+    device.device_port = args.port
     device.firmware_hash = args.firmware_hash
     device.firmware_version = args.version
 
@@ -64,7 +68,7 @@ if __name__ == '__main__':
     # must fix port number
     data = {
         'ip': device.device_ip,
-        'port': '111',
+        'port': device.device_port,
         'UUID': device.UUID,
     }
 
@@ -73,3 +77,5 @@ if __name__ == '__main__':
     response = requests.post(trader_url, json=data)
     if response.ok:
         print(response.text)
+
+    app.run(host='0.0.0.0', port=device.device_port)
