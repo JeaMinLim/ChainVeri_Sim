@@ -27,6 +27,26 @@ class DeviceInfo:
 app = Flask(__name__)
 
 
+@app.route('/connect/device', methods=['POST'])
+def connect_device():
+    # send connection result to IoT device
+    values = request.get_json()
+
+    # Check that the required fields are in the POST'ed data
+    required = ['ip', 'port', 'UUID']
+    if not all(k in values for k in required):
+        return 'Missing values', 400
+
+    device_uuid = values.get('UUID')
+
+    response = {
+        'message': 'connected',
+        'my_UUID': device.UUID,
+        'your_UUID': device_uuid,
+    }
+    return jsonify(response), 201
+
+
 if __name__ == '__main__':
     from argparse import ArgumentParser
 
@@ -63,19 +83,20 @@ if __name__ == '__main__':
 
     print("Connection check")
     trader_url = "http://" + device.trader_ip + ":" + str(device.trader_port) + "/nodes/device"
-    print("\t URL: " + trader_url)
+    print("\t Trader check URL: " + trader_url)
 
-    # must fix port number
     data = {
         'ip': device.device_ip,
         'port': device.device_port,
         'UUID': device.UUID,
     }
 
-    print(json.dumps(data))
-
     response = requests.post(trader_url, json=data)
     if response.ok:
-        print(response.text)
+        try:
+            app.run(host='0.0.0.0', port=device.device_port)
+        except:
+            print("You are not the first device")
+            device.device_port = device.device_port + 1
+            app.run(host='0.0.0.0', port=device.device_port)
 
-    app.run(host='0.0.0.0', port=device.device_port)
