@@ -17,24 +17,14 @@ class device_info:
         self.trader_ip = []
         self.trader_port = []
 
-    def request_verification(self, other_ip, other_port):
-        """
-        request verification process to other IoT devices
-
-        :param other_ip: other IoT device IP address
-        :param other_port: other IoT device port number
-        :return: True if valid, False if not
-        """
-        request_url = "http://" + other_ip + ":" + str(other_port) + "/verification/request"
-        response = requests.get(trader_url)
-
-
-
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
+
+    # set default config
+    # firmware
     parser.add_argument('-ip', '--ip', help='Trader`s ip address ', default='127.0.0.1')
     parser.add_argument('-p', '--port', help='Trader`s port number', default=5000, type=int)
     parser.add_argument('-m', '--model', default='JML_MK1', help='IoT device model name')
@@ -51,13 +41,6 @@ if __name__ == '__main__':
     device_info.firmware_hash = args.firmware_hash
     device_info.firmware_version = args.version
 
-    print("Trader information")
-    trader_url = "http://" + device_info.trader_ip + ":" + str(device_info.trader_port) + "/information/you"
-
-    response = requests.get(trader_url)
-    print(response.text)
-
-    print("\t URL: " + trader_url)
     print("IoT node information")
     print("\t MODEL: " + device_info.model_name)
     print("\t SENDER(IoT device) UUID: " + device_info.UUID)
@@ -66,11 +49,15 @@ if __name__ == '__main__':
     device_ip = socket.gethostbyname(socket.gethostname())
     print("\t IP address: " + device_ip)
 
-    from argparse import ArgumentParser
+    print("Connection check")
+    trader_url = "http://" + device_info.trader_ip + ":" + str(device_info.trader_port) + "/nodes/device"
+    print("\t URL: " + trader_url)
 
-    parser = ArgumentParser()
-    parser.add_argument('-p', '--port', default=5100, type=int, help='port to listen on')
-    args = parser.parse_args()
-    port = args.port
+    # must fix port number
+    data = {
+        'ip': device_ip,
+        'UUID': device_info.UUID,
+    }
 
-    app.run(host='0.0.0.0', port=port)
+    response = requests.post(trader_url, data=json.dumps(data))
+    print(response.text)
