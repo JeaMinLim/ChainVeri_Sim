@@ -47,6 +47,21 @@ def connect_device():
     return jsonify(response), 201
 
 
+def ConnetOther(self, _IP, _PORT):
+    print("Connect to IoT device")
+    _url = "http://" + _IP + ":" + _PORT + "/connect/device"
+
+    data = {
+        'ip': device.device_ip,
+        'port': device.device_port,
+        'UUID': device.UUID,
+    }
+
+    response = requests.post(_url, json=data)
+    if response.ok:
+        print(response)
+
+
 if __name__ == '__main__':
     from argparse import ArgumentParser
 
@@ -98,5 +113,9 @@ if __name__ == '__main__':
         except:
             print("You are not the first device")
             device.device_port = device.device_port + 1
+            # minimum handshake
+            ConnetOther(device, device.device_ip, str(device.device_port - 1))
+            
             app.run(host='0.0.0.0', port=device.device_port)
+
 
