@@ -1,8 +1,13 @@
 import json
+import logging
+import logging.handlers
+
+import os
 import requests
 from uuid import uuid4
 from flask import Flask, jsonify, request
 from netifaces import interfaces, ifaddresses, AF_INET
+
 
 class DeviceInfo:
     def __init__(self):
@@ -23,6 +28,27 @@ class DeviceInfo:
         # create UUID for IoT device
         self.UUID = str(uuid4())
 
+
+def _getLogger(_logName, _logDir, _logSize=500*1024, _logCount=4):
+    if not os.path.exists(_logDir):
+        os.makedirs(_logDir)
+    _logfile = '%s/%s.log' % (_logDir, _logName)
+    _logLevel = logging.INFO
+    _logger = logging.getLogger(_logName)
+    _logger.setLevel(_logLevel)
+    if _logger.handlers is not None and len(_logger.handlers) >= 0:
+        for handler in _logger.handlers:
+            _logger.removeHandler(handler)
+            _logger.handlers = []
+        _loghandler = logging.handlers.RotatingFileHandler(_logfile, maxBytes=_logSize, backupCount=_logCount)
+        _formatter = logging.Formatter('[%(asctime)s] %(message)s')
+        _loghandler.setFormatter(_formatter)
+        _logger.addHandler(_loghandler)
+
+        return _logger
+
+
+logger = _getLogger('IoTdevice', './log')
 
 app = Flask(__name__)
 
@@ -47,7 +73,7 @@ def connect_device():
     return jsonify(response), 201
 
 
-def ConnetOther(self, _IP, _PORT):
+def connetOther(self, _IP, _PORT):
     print("Connect to IoT device")
     _url = "http://" + _IP + ":" + _PORT + "/connect/device"
 
@@ -89,12 +115,13 @@ if __name__ == '__main__':
     device.firmware_hash = args.firmware_hash
     device.firmware_version = args.version
 
-    print("IoT node information")
-    print("\t MODEL: " + device.model_name)
-    print("\t SENDER(IoT device) UUID: " + device.UUID)
-    print("\t FIRMWARE HASH: " + device.firmware_hash)
-    print("\t FIRMWARE VERSION:" + device.firmware_version)
-    print("\t IP address: " + device.device_ip)
+    #logger.info("IoT node information")
+    #print("IoT node information")
+    #print("\t MODEL: " + device.model_name)
+    #print("\t SENDER(IoT device) UUID: " + device.UUID)
+    #print("\t FIRMWARE HASH: " + device.firmware_hash)
+    #print("\t FIRMWARE VERSION:" + device.firmware_version)
+    #print("\t IP address: " + device.device_ip)
 
     print("Connection check")
     trader_url = "http://" + device.trader_ip + ":" + str(device.trader_port) + "/nodes/device"
@@ -105,17 +132,19 @@ if __name__ == '__main__':
         'port': device.device_port,
         'UUID': device.UUID,
     }
-
     response = requests.post(trader_url, json=data)
     if response.ok:
         try:
+            logPrefix = "1ST"
+            logger.info("Start IoT device %s: listen %s:%s" % (logPrefix, '0.0.0.0', device.device_port))
             app.run(host='0.0.0.0', port=device.device_port)
         except:
             print("You are not the first device")
             device.device_port = device.device_port + 1
             # minimum handshake
-            ConnetOther(device, device.device_ip, str(device.device_port - 1))
-            
+            connetOther(device, device.device_ip, str(device.device_port - 1))
+            logPrefix = '2ND:'
+            logger.info("Start IoT device : listen %s:%s" % ('0.0.0.0', device.device_port))
             app.run(host='0.0.0.0', port=device.device_port)
-
-
+    else:
+        print("connection test fail")

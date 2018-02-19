@@ -12,6 +12,7 @@ from datetime import datetime
 import logging
 import logging.handlers
 
+
 class Blockchain:
     # Initalize ChainVeri Blockchain
     def __init__(self):
@@ -205,7 +206,7 @@ node_identifier = str(uuid4()).replace('-', '')
 blockchain = Blockchain()
 
 
-def getLogger(_logName, _logDir, _logSize=500*1024, _logCount=4):
+def _getLogger(_logName, _logDir, _logSize=500*1024, _logCount=4):
     if not os.path.exists(_logDir):
         os.makedirs(_logDir)
     _logfile = '%s/%s.log' % (_logDir, _logName)
@@ -224,7 +225,7 @@ def getLogger(_logName, _logDir, _logSize=500*1024, _logCount=4):
         return _logger
 
 
-logger = getLogger('trader', './log')
+logger = _getLogger('trader', './log')
 
 
 @app.route('/connect/device', methods=['POST'])
