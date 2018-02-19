@@ -124,7 +124,7 @@ if __name__ == '__main__':
     #print("\t IP address: " + device.device_ip)
 
     print("Connection check")
-    trader_url = "http://" + device.trader_ip + ":" + str(device.trader_port) + "/nodes/device"
+    trader_url = "http://" + device.trader_ip + ":" + str(device.trader_port) + "/connect/device"
     print("\t Trader check URL: " + trader_url)
 
     data = {
