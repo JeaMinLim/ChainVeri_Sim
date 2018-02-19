@@ -4,11 +4,13 @@ from time import time
 from urllib.parse import urlparse
 from uuid import uuid4
 
+import os
 import requests
 from flask import Flask, jsonify, request
 
 from datetime import datetime
-
+import logging
+import logging.handlers
 
 class Blockchain:
     # Initalize ChainVeri Blockchain
@@ -197,17 +199,38 @@ class Blockchain:
 
 # Instantiate the Node
 app = Flask(__name__)
-
 # Generate a globally unique address for this node
 node_identifier = str(uuid4()).replace('-', '')
-
 # Instantiate the Blockchain
 blockchain = Blockchain()
+
+
+def getLogger(_logName, _logDir, _logSize=500*1024, _logCount=4):
+    if not os.path.exists(_logDir):
+        os.makedirs(_logDir)
+    _logfile = '%s/%s.log' % (_logDir, _logName)
+    _logLevel = logging.INFO
+    _logger = logging.getLogger(_logName)
+    _logger.setLevel(_logLevel)
+    if _logger.handlers is not None and len(_logger.handlers) >= 0:
+        for handler in _logger.handlers:
+            _logger.removeHandler(handler)
+            _logger.handlers = []
+        _loghandler = logging.handlers.RotatingFileHandler(_logfile, maxBytes=_logSize, backupCount=_logCount)
+        _formatter = logging.Formatter('[%(asctime)s] %(message)s')
+        _loghandler.setFormatter(_formatter)
+        _logger.addHandler(_loghandler)
+
+        return _logger
+
+
+logger = getLogger('trader', './log')
 
 
 @app.route('/connect/device', methods=['POST'])
 def connect_device():
     # send connection result to IoT device
+    logger.info("\t /connect/device")
     values = request.get_json()
 
     # Check that the required fields are in the POST'ed data
@@ -226,6 +249,7 @@ def connect_device():
 @app.route('/information/you', methods=['GET'])
 def send_information():
     # Send this Trader`s information
+    logger.info("\t /information/you")
     response = {
         'trader_address': node_identifier,
     }
@@ -236,6 +260,7 @@ def send_information():
 def make_address():
     # Generate and send random identifier(UUID) for IoT devices.
     # This API is for simulations ONLY!!!!
+    logger.info("\t /address/device")
     identifier = str(uuid4())
 
     response = {
@@ -247,6 +272,7 @@ def make_address():
 @app.route('/dump', methods=['GET'])
 def save_blockchain():
     # save blockchain into file
+    logger.info("\t /dump")
     date = datetime.today().strftime("%Y%m%d%H%M")
 
     file = open("ChainVeri-" + date, 'w')
@@ -266,6 +292,7 @@ def save_blockchain():
 @app.route('/mine', methods=['GET'])
 def mine():
     # We run the proof of work algorithm to get the next proof...
+    logger.info("\t /mine")
     last_block = blockchain.last_block
     proof = blockchain.proof_of_work(last_block)
 
@@ -285,6 +312,7 @@ def mine():
 
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
+    logger.info("\t /transaction/new")
     values = request.get_json()
 
     # Check that the required fields are in the POST'ed data
@@ -301,6 +329,7 @@ def new_transaction():
 
 @app.route('/chain', methods=['GET'])
 def full_chain():
+    logger.info("\t /chain")
     response = {
         'chain': blockchain.chain,
         'length': len(blockchain.chain),
@@ -310,6 +339,7 @@ def full_chain():
 
 @app.route('/nodes/register', methods=['POST'])
 def register_nodes():
+    logger.info("\t /nodes/register")
     values = request.get_json()
 
     nodes = values.get('nodes')
@@ -328,6 +358,7 @@ def register_nodes():
 
 @app.route('/nodes/resolve', methods=['GET'])
 def consensus():
+    logger.info("\t /nodes/resolve")
     replaced = blockchain.resolve_conflicts()
 
     if replaced:
@@ -351,5 +382,7 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--port', default=5000, type=int, help='port to listen on')
     args = parser.parse_args()
     port = args.port
+
+    logger.info("Start trader: listen %s:%s" % ('0.0.0.0', port))
 
     app.run(host='0.0.0.0', port=port)
