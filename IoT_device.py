@@ -23,7 +23,7 @@ class DeviceInfo:
         _iface = interfaces()
         _iface.remove(u'lo')
         _iface = ', '.join(_iface)
-        _tmp = [i['addr'] for i in ifaddresses(_iface).setdefault(AF_INET, [{'addr':'No IP addr'}] )]
+        _tmp = [i['addr'] for i in ifaddresses(_iface).setdefault(AF_INET, [{'addr': 'No IP addr'}])]
         self.device_ip = ', '.join(_tmp)
         # create UUID for IoT device
         self.UUID = str(uuid4())
@@ -32,7 +32,7 @@ class DeviceInfo:
         self.resUUID = []
 
 
-def _getLogger(_logName, _logDir, _logSize=500*1024, _logCount=4):
+def _getLogger(_logName, _logDir, _logSize=500 * 1024, _logCount=4):
     if not os.path.exists(_logDir):
         os.makedirs(_logDir)
     _logfile = '%s/%s.log' % (_logDir, _logName)
@@ -59,8 +59,21 @@ device = DeviceInfo()
 app = Flask(__name__)
 
 
-@app.route('/verification/info')
-def verificaitonInfo():
+@app.route('')
+
+
+@app.route('verification/result', methods=['POST'])
+def verification_resutl():
+    return
+
+
+@app.route('verification/exchange', methods=['POST'])
+def exchainge_vinfo():
+    return
+
+
+@app.route('/verification/info', methods=['GET'])
+def verificaiton_info():
     # trigger verification process
     # caller should be REST API client(POSTMAN, cURL eta)
     logger.info("verification")
@@ -155,8 +168,9 @@ if __name__ == '__main__':
     parser.add_argument('-tip', '--tip', help='Trader`s ip address ', default='127.0.0.1')
     parser.add_argument('-tp', '--tport', help='Trader`s port number', default=5000, type=int)
     parser.add_argument('-m', '--model', default='JML_MK1', help='IoT device model name')
-    #parser.add_argument('-s', '--sender', help='UUID of IoT device', default='83765f2d-49c8-4d74-95b2-2486116e7101')
-    parser.add_argument('-f', '--firmware_hash', help='Hash value of firmware', default='773c839d24cf91c394aca6f1b9cd40da')
+    # parser.add_argument('-s', '--sender', help='UUID of IoT device', default='83765f2d-49c8-4d74-95b2-2486116e7101')
+    parser.add_argument('-f', '--firmware_hash', help='Hash value of firmware',
+                        default='773c839d24cf91c394aca6f1b9cd40da')
     parser.add_argument('-v', '--version', help='firmware version in string', default='Ubuntu 17.10')
     parser.add_argument('-ip', '--ip', help='This device IP', default='127.0.0.1')
     parser.add_argument('-p', '--port', help='This device port number', default=5100, type=int)
@@ -195,6 +209,6 @@ if __name__ == '__main__':
             app.run(host='0.0.0.0', port=device.device_port)
             logPrefix = '2ND:'
             logger.info("Start IoT device %s: listen %s:%s" % (logPrefix, '0.0.0.0', device.device_port))
-            #showDevInfo()
+            # showDevInfo()
     else:
         print("connection test fail")
