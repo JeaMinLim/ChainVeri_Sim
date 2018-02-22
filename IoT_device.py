@@ -59,15 +59,12 @@ device = DeviceInfo()
 app = Flask(__name__)
 
 
-@app.route('')
-
-
-@app.route('verification/result', methods=['POST'])
+app.route('/verification/result', methods=['POST'])
 def verification_resutl():
     return
 
 
-@app.route('verification/exchange', methods=['POST'])
+@app.route('/verification/exchange', methods=['POST'])
 def exchainge_vinfo():
     return
 
@@ -96,7 +93,7 @@ def verificaiton_info():
     return jsonify(response), 201
 
 
-@app.route('/connect/device', methods=['POST'])
+@app.route('/connect', methods=['POST'])
 def connect_device():
     # send connection result to IoT device
     values = request.get_json()
@@ -117,6 +114,21 @@ def connect_device():
         'UUID': device.UUID,
     }
     return jsonify(response), 201
+
+
+def connect_to_device(self, _ip, _port):
+    logger.info("Connection check to %s:%s" % (_ip, _port) )
+    _url = "http://" + _ip + ":" + str(_port) + "/connect"
+
+    _data = {
+        'ip': device.device_ip,
+        'port': device.device_port,
+        'UUID': device.UUID,
+    }
+
+    response = requests.post(_url, json=_data)
+
+    return response
 
 
 def triggerVerification(self, _IP, _PORT):
@@ -148,7 +160,7 @@ def triggerVerification(self, _IP, _PORT):
         logger.info("can not find other IoT device")
 
 
-def showDevInfo():
+def log_device_info():
     # print current device Info
     logger.info("IoT node information: %s" % logPrefix)
     logger.info("\t MODEL: " + device.model_name)
@@ -184,31 +196,28 @@ if __name__ == '__main__':
     device.firmware_hash = args.firmware_hash
     device.firmware_version = args.version
 
-    print("Connection check")
-    trader_url = "http://" + device.trader_ip + ":" + str(device.trader_port) + "/connect/device"
-    print("\t Trader check URL: " + trader_url)
+    logger.info("Connection test with Trader")
+    response = connect_to_device(device, device.trader_ip, device.trader_port)
 
-    data = {
-        'ip': device.device_ip,
-        'port': device.device_port,
-        'UUID': device.UUID,
-    }
-
-    response = requests.post(trader_url, json=data)
     if response.ok:
         try:
             logPrefix = "1ST"
             app.run(host='0.0.0.0', port=device.device_port)
             logger.info("Start IoT device %s: listen %s:%s" % (logPrefix, '0.0.0.0', device.device_port))
-            showDevInfo()
+            log_device_info()
+
         except:
             print("You are not the first device")
             device.device_port = device.device_port + 1
-            # minimum handshake
-            triggerVerification(device, device.device_ip, str(device.device_port - 1))
+
+            logger.info("Connection test with First IoT device")
+            device.resDevice_ip = '127.0.0.01'
+            device.resDevice_port = 5100
+            response = connect_to_device(device, device.device_ip, device.trader_port)
+
             app.run(host='0.0.0.0', port=device.device_port)
             logPrefix = '2ND:'
             logger.info("Start IoT device %s: listen %s:%s" % (logPrefix, '0.0.0.0', device.device_port))
-            # showDevInfo()
+            log_device_info()
     else:
         print("connection test fail")
