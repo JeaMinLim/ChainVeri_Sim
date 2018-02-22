@@ -228,7 +228,7 @@ def _getLogger(_logName, _logDir, _logSize=500*1024, _logCount=4):
 logger = _getLogger('trader', './log')
 
 
-@app.route('/connect/device', methods=['POST'])
+@app.route('/connect', methods=['POST'])
 def connect_device():
     # send connection result to IoT device
     logger.info("\t /connect/device")
