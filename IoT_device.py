@@ -30,6 +30,7 @@ class DeviceInfo:
         self.resDevice_ip = []
         self.resDevice_port = []
         self.resUUID = []
+        self.vinfo = {'sender': [], 'model': [], 'firmware': [], 'version': []}
 
 
 def _getLogger(_logName, _logDir, _logSize=500 * 1024, _logCount=4):
@@ -64,13 +65,33 @@ def verification_resutl():
     return
 
 
-@app.route('/verification/exchange', methods=['POST'])
-def exchainge_vinfo():
-    return
+@app.route('/verification/device', methods=['POST'])
+def exchange_vinfo():
+    # init verification
+    logger.info("exchange vinfo")
+    values = request.get_json()
+    # Firmware data is essential
+    required = ['sender', 'model', 'firmware', 'version']
+    if not all(k in values for k in required):
+        return 'Missing values', 400
+    # save recived vinfo
+    device.vinfo['sender'] = values.get('sender')
+    device.vinfo['model'] = values.get('model')
+    device.vinfo['firmware'] = values.get('firmware')
+    device.vinfo['version'] = values.get('version')
+
+    data = {
+        'sender': device.UUID,
+        'model': device.model_name,
+        'firmware': device.firmware_hash,
+        'version': device.firmware_version,
+    }
+
+    return jsonify(data), 201
 
 
 @app.route('/verification/info', methods=['GET'])
-def verificaiton_info():
+def verification_info():
     # trigger verification process
     # caller should be REST API client(POSTMAN, cURL eta)
     logger.info("verification")
@@ -88,6 +109,12 @@ def verificaiton_info():
         'responder': {
             'ip': device.resDevice_ip,
             'port': device.resDevice_port,
+        },
+        'v-info': {
+            'sender': device.vinfo['sender'],
+            'model': device.vinfo['model'],
+            'firmware': device.vinfo['firmware'],
+            'version': device.vinfo['version'],
         }
     }
     return jsonify(response), 201
