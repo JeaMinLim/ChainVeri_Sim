@@ -12,11 +12,13 @@ from datetime import datetime
 import logging
 import logging.handlers
 
+from operator import eq
+
 
 class Blockchain:
     # Initalize ChainVeri Blockchain
     def __init__(self):
-        self.current_transactions = []
+        self.verification_info = []
         self.chain = []
         self.nodes = set()
 
@@ -114,32 +116,32 @@ class Blockchain:
         block = {
             'index': len(self.chain) + 1,
             'timestamp': time(),
-            'transactions': self.current_transactions,
+            'transactions': self.verification_info,
             'proof': proof,
             'previous_hash': previous_hash or self.hash(self.chain[-1]),
             'type': 1,
         }
 
         # Reset the current list of transactions
-        self.current_transactions = []
+        self.verification_info = []
 
         self.chain.append(block)
         return block
 
-    def new_transaction(self, sender, model_name, firmware_hash, version):
+    def new_verification(self, sender, model, firmware, version):
         """
         Creates a new verification info to go into the next mined Block
 
         :param sender: Address of the Sender(UUID or Public Key eta.)
-        :param model_name: name of IoT device model
-        :param firmware_hash: The hash value of firmware
+        :param model: name of IoT device model
+        :param firmware: The hash value of firmware
         :param version: firmware version
         :return: The index of the Block that will hold this transaction
         """
-        self.current_transactions.append({
+        self.verification_info.append({
             'sender': sender,
-            'model_name': model_name,
-            'firmware_hash': firmware_hash,
+            'model': model,
+            'firmware': firmware,
             'version': version
         })
 
@@ -311,20 +313,61 @@ def mine():
     return jsonify(response), 200
 
 
-@app.route('/transactions/new', methods=['POST'])
-def new_transaction():
+def requst_device_vinfo(_ip, _port):
+    logger.info("request vinfo to %s:%s" % (_ip, _port) )
+    _url = "http://" + _ip + ":" + str(_port) + "/verification/device"
+
+    data = {
+        'sender': "",
+        'model': "",
+        'firmware': "",
+        'version': "",
+    }
+
+    response = requests.post(_url, json=data)
+
+    return response
+
+
+@app.route('/verification/new', methods=['POST'])
+def new_verification():
     logger.info("\t /transaction/new")
     values = request.get_json()
 
     # Check that the required fields are in the POST'ed data
-    required = ['sender', 'model_name', 'firmware_hash', 'version']
+    required = ['sender', 'model', 'firmware', 'version', 'ip', 'port']
     if not all(k in values for k in required):
         return 'Missing values', 400
 
-    # Create a new Transaction
-    blockchain.new_transaction(values['sender'], values['model_name'], values['firmware_hash'], values['version'])
+    # request given device v-info from ip,port
+    response_from_deivce = requst_device_vinfo(values.get('ip'), values.get('port'))
 
-    response = {'message': f'Transaction will be added to Block'}
+    receved_vinfo = response_from_deivce.json()
+    _sender = receved_vinfo.get('sender')
+    _model = receved_vinfo.get('model')
+    _firmware = receved_vinfo.get('firmware')
+    _version = receved_vinfo.get('version')
+
+    response_fail = {'message': f'Transaction failed'}
+
+    if not eq(values['sender'], receved_vinfo['sender']):
+        response_fail = {'message': f'verification failed, check sender field'}
+        return jsonify(response_fail), 201
+    if not eq(values['model'], receved_vinfo['model']):
+        response_fail = {'message': f'verification failed, check model field'}
+        return jsonify(response_fail), 201
+    if not eq(values['firmware'], receved_vinfo['firmware']):
+        response_fail = {'message': f'verification failed, check firmware field'}
+        return jsonify(response_fail), 201
+    if not eq(values['version'], receved_vinfo['version']):
+        response_fail = {'message': f'verification failed, check version field'}
+        return jsonify(response_fail), 201
+
+    # Create a new Transaction
+    blockchain.new_verification(values['sender'], values['model'], values['firmware'], values['version'])
+
+    response = {'message': f'verification will be added to Block'}
+    mine()
     return jsonify(response), 201
 
 
@@ -332,8 +375,8 @@ def new_transaction():
 def full_chain():
     logger.info("\t /chain")
     response = {
-        'chain': blockchain.chain,
         'length': len(blockchain.chain),
+        'chain': blockchain.chain,
     }
     return jsonify(response), 200
 
