@@ -275,10 +275,12 @@ def make_address():
 @app.route('/dump', methods=['GET'])
 def save_blockchain():
     # save blockchain into file
-    logger.info("\t /dump")
+    logger.info("\t /dump Palatte")
+    if not os.path.exists('./palatte'):
+        os.makedirs('./palatte')
     date = datetime.today().strftime("%Y%m%d%H%M")
 
-    file = open("ChainVeri-" + date, 'w')
+    file = open("./palatte/ChainVeri-" + date, 'w')
     file.write("ChainVeri Blockchain " + date + "\n")
     file.write(json.dumps(blockchain.chain, indent='\t'))
 
@@ -290,6 +292,30 @@ def save_blockchain():
         'index': len(blockchain.chain),
     }
     return jsonify(response), 200
+
+
+@app.route('/mine/<int:num>', methods=['GET'])
+def mine_repeat(num):
+    logger.info("\t /mine %d times" % num)
+    start_time = datetime.now()
+
+    tmp = 0
+    while tmp <= num:
+        #blockchain.new_verification(values['sender'], values['model'], values['firmware'], values['version'])
+        blockchain.new_verification('3767bef4-0ca6-40e3-b228-79cef1544311', 'IoT_Device', '1a3d2d32ada795e5df47293745a7479bcb3e4e29d8ee1eaa114350b691cf38d3', 'ubuntu-17.10.1-desktop-amd64')
+        mine()
+        tmp = tmp + 1
+
+    end_time = datetime.now()
+    delta = str(end_time - start_time)
+
+    response = {
+        'repeat': num,
+        'start_time': start_time,
+        'end_time': end_time,
+        'delta': delta
+    }
+    return  jsonify(response), 200
 
 
 @app.route('/mine', methods=['GET'])
