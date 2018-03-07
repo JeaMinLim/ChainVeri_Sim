@@ -22,7 +22,7 @@ URL/nodes/register: add reqested node as a member node
 e.g. "nodes": [URL:port"]
 ``` 
 { 
-    "nodes": [http://localhost:5000"]
+    "nodes": ["http://localhost:5000"]
 } 
 ```
 

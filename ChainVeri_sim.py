@@ -429,15 +429,27 @@ def register_nodes():
 @app.route('/nodes/resolve', methods=['GET'])
 def consensus():
     logger.info("\t /nodes/resolve")
+
+    start_time = datetime.now()
     replaced = blockchain.resolve_conflicts()
+    end_time = datetime.now()
+
+    delta = str(end_time - start_time)
 
     if replaced:
         response = {
+            'start_time': start_time,
+            'end_time': end_time,
+            'delta': delta,
             'message': 'Our chain was replaced',
             'new_chain': blockchain.chain
+
         }
     else:
         response = {
+            'start_time': start_time,
+            'end_time': end_time,
+            'delta': delta,
             'message': 'Our chain is authoritative',
             'chain': blockchain.chain
         }
