@@ -43,11 +43,11 @@ Just run CahinVeri_sim.run for basic simulation test.
 # Appendix
 This section describe extra information based on Ubuntu 17.10.
  
-## How to install python 3, ,pip, pipenv for Ubuntu 17.10
+## How to install python 3, ,pip, pipenv for Ubuntu 17.10, Raspbian
  * Python 3 : use 'apt install python3'' and 'apt update'
  * pip : apt install python-pip
  * pipenv: use 'pip install pipenv' and excute echo "PATH=$HOME/.local/bin:$PATH" >> ~/.profile
-    then 'pipenv install' to install pipenv.
+    execute source ~/.profile and then 'pipenv install' to install pipenv.
     
 ## Available APIs
 ChainVeri_sim use REST APIs
