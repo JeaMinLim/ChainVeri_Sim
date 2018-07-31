@@ -6,7 +6,8 @@ This project is ChainVeri.
 ChainVeri is a blockchain Based firmware verification system.
 The main idear of ChinVeri has been presented in the IEEE international conference on Blockchain (Blockchain-2018).
 This project only contains blockchain part to measure the overhead of ChainVeri blockchain overhead.
-Paper link: http://cse.stfx.ca/~cybermatics/2018/Proceedings/pdfs/iThings!GreenCom!CPSCom!SmartData!Blockchain!CIT!Cybermatics2018-1Q1rrimpxFNyCxx89cHrQN/2Qw04q4v5TblQBb5eVxEd6/1f1p5A9rqOPpPuzwIxNNaE.pdf
+
+Paper URL: http://cse.stfx.ca/~cybermatics/2018/Proceedings/pdfs/iThings!GreenCom!CPSCom!SmartData!Blockchain!CIT!Cybermatics2018-1Q1rrimpxFNyCxx89cHrQN/2Qw04q4v5TblQBb5eVxEd6/1f1p5A9rqOPpPuzwIxNNaE.pdf
 
 # Reqirements
 * Python3.6 or + 
